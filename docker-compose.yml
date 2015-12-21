@@ -1,0 +1,53 @@
+fxa-letsencrypt:
+  image: fxa-letsencrypt
+  ports:
+  - "80:80"
+  - "443:443"
+  links:
+  - fxa-content-server
+
+fxa-content-server:
+  image: fxa-auth-server
+  ports:
+  - "3030:3030"
+  links:
+  - fxa-auth-server
+  - fxa-oauth-server
+  - fxa-profile-server
+
+# fxa-auth-server:
+#   image: fxa-auth-server
+#   ports:
+#   - "9010:9011"
+#   links:
+#   - fxa-auth-db-mysql
+#   - fxa-auth-mailer
+#   - browserid-verifier
+# 
+# fxa-auth-db-mysql:
+#   image: fxa-auth-db-mysql
+# 
+# fxa-auth-mailer:
+#   image: fxa-auth-mailer
+# 
+# browserid-verifier:
+#   image: browserid-verifier
+# 
+# fxa-oauth-server:
+#   image: fxa-oauth-server
+#   links:
+#   - tokenserver
+# 
+# fxa-profile-server:
+#   image: fxa-profile-server
+#   links:
+#   - tokenserver
+# 
+# tokenserver:
+#   image: tokenserver
+# 
+# syncserver:
+#   image: syncserver
+# 
+# findmydevice:
+#   image: findmydevice
