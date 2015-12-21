@@ -1,0 +1,48 @@
+# Services mapping:
+
+accounts.firefox.com -443-> fxa-content-server
+ = 127.0.0.1:3030             * PUBLIC_URL= 'https://fxa.michielbdejong.com:3030'
+                              * FXA_URL= 'https://fxa.michielbdejong.com:9000'
+
+oauth.accounts.firefox.com -443-> fxa-oauth-server
+ = 127.0.0.1:9010
+
+profile.accounts.firefox.com -443-> fxa-profile-server
+ = 127.0.0.1:1111
+
+api.accounts.firefox.com -443-> fxa-auth-server
+ - 127.0.0.1:9000                 * PUBLIC_URL= 'https://fxa.michielbdejong.com:9000'
+                                  * HTTPDB_URL= 'https://fxa.michielbdejong.com:8000'
+
+# Internal:
+* fxa-auth-db-mysql
+* mailer
+
+* run fxa-content-server with letsencrypt on https://fxa.michielbdejong.com/
+* run fxa-auth-server with letsencrypt on https://fxa.michielbdejong.com:9000/
+
+
+docker run -d \
+           --name httpdb fxa-auth-db-mysql
+
+docker run -d \
+           -p 3030:3030 \
+           -v /root/fxa-cert:/fxa-cert \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
+           -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
+           -e "USE_TLS=true" \
+           -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
+           -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
+           -e "REDIRECT_PORT=3031" \
+            fxa-content-server
+
+docker run -d \
+           --link="httpdb" \
+           -p 9000:9000 \
+           -v /root/fxa-cert:/fxa-cert \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
+           -e "HTTPDB_URL=http://httpdb:8000" \
+           -e "USE_TLS=true" \
+           -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
+           -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
+           fxa-auth-server
