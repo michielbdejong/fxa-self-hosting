@@ -6,6 +6,7 @@ accounts.firefox.com -443-> fxa-content-server
 
 oauth.accounts.firefox.com -443-> fxa-oauth-server
  = 127.0.0.1:9010
+ = 9011? private?
 
 profile.accounts.firefox.com -443-> fxa-profile-server
  = 127.0.0.1:1111
@@ -27,10 +28,18 @@ docker run -d \
            --name httpdb fxa-auth-db-mysql
 
 docker run -d \
+           --name verifier.local \
+           -e "IP_ADDRESS=0.0.0.0" \
+           -e "PORT=5050" \
+           browserid-verifier
+
+
+docker run -d \
            -p 3030:3030 \
            -v /root/fxa-cert:/fxa-cert \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
            -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
+           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
            -e "USE_TLS=true" \
            -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
            -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
@@ -48,3 +57,33 @@ docker run -d \
            -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
            -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
            fxa-auth-server
+
+
+docker run -d \
+          --link="verifier.local" \
+          -p 9010:9010 \
+          -v /root/fxa-cert:/fxa-cert \
+          -e "PUBLIC_URL=https://fxa.michielbdejong.com:9010" \
+          -e "HOST=0.0.0.0" \
+          -e "CONTENT_URL=https://fxa.michielbdejong.com:3030/oauth/" \
+          -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
+          fxa-oauth-server
+
+
+* Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
+for the verification email, find the id of your fxa-auth-db-mysql container (in
+my case `aeb`), and run:
+
+ docker exec -it aeb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
+
+to mark your email address as verified.
+
+* If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
+localStorage.clear() in the console and hard-refresh.
+
+* TODO: get email working, trying in fxa-auth-server with:
+           -e "SMTP_HOST=smtp.********.net" \
+           -e "SMTP_PORT=587" \
+           -e "SMTP_SECURE=true" \
+           -e "SMTP_USER=********" \
+           -e "SMTP_PASS=`********" \
