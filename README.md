@@ -31,13 +31,13 @@ service docker start
 * Point fxa.yourdomain.com to your server in DNS
 * Ssh into your server, and run:
 ````bash
+git clone https://github.com/michielbdejong/fxa-self-hosting
+cd fxa-self-hosting
+sh ./setup.sh
 docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
+docker build -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
 
-docker run -it --net=host --name fxa-letsencrypt fxa-letsencrypt /bin/bash
-````
-* This will open a bash shell inside the container; in there, run:
-````bash
-./letsencrypt-auto --apache
+docker run -it --net=host --rm -v /etc/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash -c "service apache2 start && ./letsencrypt-auto --apache"
 ````
 * Follow the instructions to register a LetsEncrypt certificate, answers:
   * Yes
@@ -47,8 +47,4 @@ docker run -it --net=host --name fxa-letsencrypt fxa-letsencrypt /bin/bash
   * Secure
   * Ok
 
-* Type `exit` to leave the container, and start it again:
-````bash
-docker start `docker ps -aq` # TODO: find a nicer way
-````
 * Browse to https://fxa.mydomain.com/
