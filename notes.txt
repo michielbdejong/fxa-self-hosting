@@ -23,6 +23,7 @@ api.accounts.firefox.com -443-> fxa-auth-server
 
 
 docker run -d \
+           -e "HOST=0.0.0.0" \
            --name httpdb fxa-auth-db-mysql
 
 docker run -d \
@@ -40,6 +41,7 @@ docker run -d \
            --link="httpdb" \
            -p 9000:9000 \
            -v /root/fxa-cert:/fxa-cert \
+           -e "IP_ADDRESS=0.0.0.0" \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
            -e "HTTPDB_URL=http://httpdb:8000" \
            -e "USE_TLS=true" \
