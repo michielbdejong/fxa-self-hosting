@@ -100,15 +100,13 @@ docker run -d \
 
 docker run -d \
            --link="profile" \
-           --link="token" \
+           -p 1111:1111 \
            --link="sync" \
+           -p 5000:5000 \
            --link="syncto" \
-           -p 443:443 \
-           -e "DOMAIN=fxa.michielbdejong.com" \
+           -p 8000:8000 \
+           -v /root/fxa-cert:/fxa-cert \
            fxa-self-hosting
-
-
-
 
 
 * Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
