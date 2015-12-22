@@ -1,19 +1,21 @@
-fxa-letsencrypt:
+letsencrypt:
   image: fxa-letsencrypt
+  net: "host"
+  volumes_from:
+  -  proxy-config
   ports:
   - "80:80"
   - "443:443"
-  links:
-  - fxa-content-server
 
-fxa-content-server:
-  image: fxa-auth-server
-  ports:
-  - "3030:3030"
-  links:
-  - fxa-auth-server
-  - fxa-oauth-server
-  - fxa-profile-server
+content:
+  image: fxa-content-server
+  net: "host"
+  expose:
+  - "3030"
+#  links:
+#  - fxa-auth-server
+#  - fxa-oauth-server
+#  - fxa-profile-server
 
 # fxa-auth-server:
 #   image: fxa-auth-server
