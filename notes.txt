@@ -85,11 +85,6 @@ docker run -d \
             -e "HOST=0.0.0.0" \
             fxa-profile-server
 
-
-docker run -d \
-           --name token \
-           tokenserver
-
 docker run -d \
            --name sync \
            syncserver
@@ -107,6 +102,7 @@ docker run -d \
            -p 8000:8000 \
            -v /root/fxa-cert:/fxa-cert \
            fxa-self-hosting
+
 
 
 * Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
