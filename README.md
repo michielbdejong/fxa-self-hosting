@@ -1,6 +1,10 @@
 # fxa-self-hosting
 Instructions for hosting a Firefox Accounts instance on your own domain name
 
+## Work in progress
+
+Do *not* use this in production! It's not ready yet. :)
+
 ## Steps:
 * Get a domain name if you don't have one yet.
 * Get a fresh Ubuntu 15.10 server.
