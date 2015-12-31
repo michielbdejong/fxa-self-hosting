@@ -28,13 +28,12 @@ docker build -t browserid-verifier https://github.com/michielbdejong/browserid-v
 docker build -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
 docker build -t syncserver https://github.com/michielbdejong/syncserver.git#docker
 docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
-docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git#docker
 
 echo Setting up LetsEncrypt
 
 docker run -it --net=host --rm -v /etc/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash -c "service apache2 start && ./letsencrypt-auto --apache"
-cp -r /etc/letsencrypt/live/fxa.michielbdejong.com /root/fxa-cert
-chmod -R ugo+r /root/fxa-cert
+cp -r /etc/letsencrypt/live/fxa.michielbdejong.com ./fxa-cert
+chmod -R ugo+r ./fxa-cert
 
 echo Starting up
 
@@ -47,13 +46,12 @@ docker run -d \
            --name verifier.local \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PORT=5050" \
-           -e "INSECURE_SSL=true" \
            browserid-verifier
 
 
 docker run -d \
            -p 3030:3030 \
-           -v /root/fxa-cert:/fxa-cert \
+           -v ./fxa-cert:/fxa-cert \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
            -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
            -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
@@ -61,13 +59,14 @@ docker run -d \
            -e "USE_TLS=true" \
            -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
            -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
+           -e "TLS_CA_PATH=/fxa-cert/chain.pem" \
            -e "REDIRECT_PORT=3031" \
             fxa-content-server
 
 docker run -d \
            --link="httpdb" \
            -p 9000:9000 \
-           -v /root/fxa-cert:/fxa-cert \
+           -v ./fxa-cert:/fxa-cert \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
            -e "HTTPDB_URL=http://httpdb:8000" \
@@ -80,7 +79,7 @@ docker run -d \
 docker run -d \
            --link="verifier.local" \
            -p 9010:9010 \
-           -v /root/fxa-cert:/fxa-cert \
+           -v ./fxa-cert:/fxa-cert \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:9010" \
            -e "HOST=0.0.0.0" \
            -e "CONTENT_URL=https://fxa.michielbdejong.com:3030/oauth/" \
@@ -111,6 +110,5 @@ docker run -d \
            -p 5000:5000 \
            --link="syncto" \
            -p 8000:8000 \
-           -v /root/fxa-cert:/fxa-cert \
+           -v ./fxa-cert:/fxa-cert \
            fxa-self-hosting
-
