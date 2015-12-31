@@ -30,10 +30,9 @@ api.accounts.firefox.com -443-> fxa-auth-server
 
 
 * Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
-for the verification email, find the id of your fxa-auth-db-mysql container (in
-my case `aeb`), and run:
+for the verification email, run:
 
- docker exec -it aeb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
+ docker exec -it httpdb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
 
 to mark your email address as verified.
 
