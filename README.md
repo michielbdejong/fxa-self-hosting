@@ -3,7 +3,7 @@ Instructions for hosting a Firefox Accounts instance on your own domain name
 
 ## Work in progress
 
-Do *not* use this in production! It's not ready yet. :)
+Do *not* use this in production! It's not ready yet. :) Most services still use the development settings, so that's entirely insecure. Apart from that, all it can do so far is show you an `Unexpected error` message (still debugging that).
 
 ## Steps:
 * Get a domain name if you don't have one yet.
