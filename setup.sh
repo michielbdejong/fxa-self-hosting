@@ -67,9 +67,9 @@ docker run -d \
 docker rm profile
 docker run -d \
            --name profile \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:5222" \
-           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com:3000" \
-           -e "OAUTH_SERVER_URL=https://fxa.michielbdejong.com:4545" \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:1111" \
+           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com:9000" \
+           -e "OAUTH_SERVER_URL=https://fxa.michielbdejong.com:9010" \
            -e "IMG=local" \
            -e "HOST=0.0.0.0" \
            fxa-profile-server
@@ -85,12 +85,12 @@ docker run -d \
            syncto
 
 docker run -d \
-           -p 443:3030 \
+           -p 3030:3030 \
            -v `pwd`/fxa-cert:/fxa-cert \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
-           -e "FXA_URL=https://fxa.michielbdejong.com:3000" \
-           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:4545" \
-           -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:5222" \
+           -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
+           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
+           -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
            -e "USE_TLS=true" \
            -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
            -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
@@ -103,10 +103,10 @@ sleep 5
 
 docker run -d \
            --link="httpdb" \
-           -p 3000:9000 \
+           -p 9000:9000 \
            -v `pwd`/fxa-cert:/fxa-cert \
            -e "IP_ADDRESS=0.0.0.0" \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:3000" \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
            -e "HTTPDB_URL=http://httpdb:8000" \
            -e "USE_TLS=true" \
            -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
@@ -115,9 +115,9 @@ docker run -d \
 
 docker run -d \
            --link="verifier.local" \
-           -p 4545:9010 \
+           -p 9010:9010 \
            -v `pwd`/fxa-cert:/fxa-cert \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:4545" \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:9010" \
            -e "HOST=0.0.0.0" \
            -e "CONTENT_URL=https://fxa.michielbdejong.com/oauth/" \
            -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
@@ -126,9 +126,9 @@ docker run -d \
 # Proxy for three servers that can't run https themselves:
 docker run -d \
            --link="profile" \
-           -p 5222:1111 \
+           -p 1111:1111 \
            --link="sync" \
-           -p 8080:5000 \
+           -p 5000:5000 \
            --link="syncto" \
            -p 8000:8000 \
            -v `pwd`/fxa-cert:/fxa-cert \
@@ -153,13 +153,13 @@ echo On Mac, see https://[$DOCKER_HOST]:3030/
 
 ## Backend:
 pagekite.py --frontend=fxa.michielbdejong.com:80 \
-            192.168.99.100:443 https://fxa.michielbdejong.com:443 AND \
-            192.168.99.100:3000 https://fxa.michielbdejong.com:3000 AND \
-            192.168.99.100:4545 https://fxa.michielbdejong.com:4545 AND \
-            192.168.99.100:5222 https://fxa.michielbdejong.com:5222 AND \
-            192.168.99.100:8080 https://fxa.michielbdejong.com:8080 AND \
+            192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
+            192.168.99.100:9000 https://fxa.michielbdejong.com:9000 AND \
+            192.168.99.100:9010 https://fxa.michielbdejong.com:9010 AND \
+            192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
+            192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
             192.168.99.100:8000 https://fxa.michielbdejong.com:8000
 
 ## Frontend:
-pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,443,3000,4545,5222,8080,8000
+pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,3030,9000,9010,1111,5000,8000
 ## TODO: not use a http connection to the frontend
