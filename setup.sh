@@ -20,13 +20,13 @@ service docker start
 echo Building Mozilla images
 
 docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
-docker build -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
+docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
 docker build -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
-docker build -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
-docker build -t fxa-oauth-server https://github.com/michielbdejong/fxa-oauth-server.git#docker
+docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
+docker build -t fxa-oauth-server https://github.com/mozilla/fxa-oauth-server.git
 docker build -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
-docker build -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
-docker build -t syncserver https://github.com/michielbdejong/syncserver.git#docker
+docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
+docker build -t syncserver https://github.com/mozilla-services/syncserver.git
 docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
 docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git
 
@@ -62,7 +62,8 @@ docker run -d \
            --name verifier.local \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PORT=5050" \
-           browserid-verifier
+           browserid-verifier \
+           npm start
 
 docker rm profile
 docker run -d \
