@@ -86,39 +86,35 @@ docker run -d \
 
 docker run -d \
            --name content \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
            -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
            -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
            -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
            -e "REDIRECT_PORT=3031" \
            fxa-content-server
 
-echo Sleeping to let services come up before linking
-sleep 5
-
 docker run -d \
+           --name auth \
            --link="httpdb" \
-           -p 9000:9000 \
-           -v `pwd`/fxa-cert:/fxa-cert \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
            -e "HTTPDB_URL=http://httpdb:8000" \
-           -e "USE_TLS=true" \
-           -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
-           -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
            fxa-auth-server
 
 docker run -d \
            --link="verifier.local" \
-           -p 9010:9010 \
-           -v `pwd`/fxa-cert:/fxa-cert \
+           --name oauth \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:9010" \
            -e "HOST=0.0.0.0" \
-           -e "CONTENT_URL=https://fxa.michielbdejong.com/oauth/" \
+           -e "CONTENT_URL=https://fxa.michielbdejong.com:3030/oauth/" \
            -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
            fxa-oauth-server
 
-# Proxy for some of the servers:
+echo Sleeping to let services come up before linking
+sleep 5
+
+echo Setting up proxy
+
 docker run -d \
            --link="profile" \
            -p 1111:1111 \
@@ -128,6 +124,10 @@ docker run -d \
            -p 5000:5000 \
            --link="syncto" \
            -p 8000:8000 \
+           --link="auth" \
+           -p 9000:9000 \
+           --link="oauth" \
+           -p 9010:9010 \
            -v `pwd`/fxa-cert:/fxa-cert \
            fxa-self-hosting
 
