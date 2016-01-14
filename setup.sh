@@ -93,6 +93,9 @@ docker run -d \
            -e "REDIRECT_PORT=3031" \
            fxa-content-server
 
+echo Sleeping to let services come up before linking
+sleep 5
+
 docker run -d \
            --name auth \
            --link="httpdb" \
