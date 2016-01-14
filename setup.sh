@@ -1,47 +1,51 @@
 #!/bin/bash
 echo This startup script is for Ubuntu Wily 15.10
 
-echo General setup
+echo General setup - skipping
 
-apt-get update -y
-apt-get upgrade -y
-apt-get install -y unattended-upgrades git vim python
+# apt-get update -y
+# apt-get upgrade -y
+# apt-get install -y unattended-upgrades git vim python
 
 
-echo Setting up Docker
+echo Setting up Docker - skipping
 
-apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-echo deb https://apt.dockerproject.org/repo ubuntu-wily main > /etc/apt/sources.list.d/docker.list
-apt-get update
-apt-get purge lxc-docker*
-apt-get install -y linux-image-extra-$(uname -r) docker-engine docker-compose
-service docker start
+# apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+# echo deb https://apt.dockerproject.org/repo ubuntu-wily main > /etc/apt/sources.list.d/docker.list
+# apt-get update
+# apt-get purge lxc-docker*
+# apt-get install -y linux-image-extra-$(uname -r) docker-engine docker-compose
+# service docker start
 
-echo Building Mozilla images
 
-docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
-docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
-docker build -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
-docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
-docker build -t fxa-oauth-server https://github.com/mozilla/fxa-oauth-server.git
-docker build -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
-docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
-docker build -t syncserver https://github.com/mozilla-services/syncserver.git
-docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
-docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git
+echo Building Mozilla images - skipping
 
-echo Setting up LetsEncrypt
+# docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
+# docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
+# docker build -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
+# docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
+# docker build -t fxa-oauth-server https://github.com/mozilla/fxa-oauth-server.git
+# docker build -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
+# docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
+# docker build -t syncserver https://github.com/mozilla-services/syncserver.git
+# docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
+# docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git
 
-docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
 
-$ service apache2 start
--> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
-$ ./letsencrypt-auto --apache --text -vv
--> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
-$ exit
+echo Setting up LetsEncrypt - skipping
 
-cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
-chmod -R ugo+r `pwd`/fxa-cert
+# docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
+#
+# $ service apache2 start
+# -> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
+# $ ./letsencrypt-auto --apache --text -vv
+# -> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
+# $ exit
+#
+# cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
+# chmod -R ugo+r `pwd`/fxa-cert
+# cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.pem
+
 
 echo Stopping all running Docker containers
 docker stop `docker ps -q`
@@ -51,13 +55,11 @@ echo Starting up
 
 cd ~/notes
 
-docker rm httpdb
 docker run -d \
            -e "HOST=0.0.0.0" \
            --name httpdb \
           fxa-auth-db-mysql
 
-docker rm verifier.local
 docker run -d \
            --name verifier.local \
            -e "IP_ADDRESS=0.0.0.0" \
@@ -65,7 +67,6 @@ docker run -d \
            browserid-verifier \
            npm start
 
-docker rm profile
 docker run -d \
            --name profile \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:1111" \
@@ -75,29 +76,22 @@ docker run -d \
            -e "HOST=0.0.0.0" \
            fxa-profile-server
 
-docker rm sync
 docker run -d \
            --name sync \
            syncserver
 
-docker rm syncto
 docker run -d \
            --name syncto \
            syncto
 
 docker run -d \
-           -p 3030:3030 \
-           -v `pwd`/fxa-cert:/fxa-cert \
+           --name content \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
            -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
            -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
            -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
-           -e "USE_TLS=true" \
-           -e "TLS_KEY_PATH=/fxa-cert/privkey.pem" \
-           -e "TLS_CERT_PATH=/fxa-cert/cert.pem" \
-           -e "TLS_CA_PATH=/fxa-cert/chain.pem" \
            -e "REDIRECT_PORT=3031" \
-            fxa-content-server
+           fxa-content-server
 
 echo Sleeping to let services come up before linking
 sleep 5
@@ -124,10 +118,12 @@ docker run -d \
            -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
            fxa-oauth-server
 
-# Proxy for three servers that can't run https themselves:
+# Proxy for some of the servers:
 docker run -d \
            --link="profile" \
            -p 1111:1111 \
+           --link="content" \
+           -p 3030:3030 \
            --link="sync" \
            -p 5000:5000 \
            --link="syncto" \
@@ -136,31 +132,30 @@ docker run -d \
            fxa-self-hosting
 
 docker ps -a
-# You should see 9 servers
-# - fxa-self-hosting,
-# - fxa-oauth-server,
-# - fxa-auth-server,
-# - fxa-content-server,
-# - syncto,
-# - syncserver,
-# - fxa-profile-server,
-# - browserid-verifier,
-# - fxa-auth-db-mysql
-#
+echo You should see 9 servers
+echo - fxa-self-hosting,
+echo - fxa-oauth-server,
+echo - fxa-auth-server,
+echo - fxa-content-server,
+echo - syncto,
+echo - syncserver,
+echo - fxa-profile-server,
+echo - browserid-verifier,
+echo - fxa-auth-db-mysql
+
 echo On Mac, see https://[$DOCKER_HOST]:3030/
 
-
-# Running pagekite:
-
-## Backend:
-pagekite.py --frontend=fxa.michielbdejong.com:80 \
-            192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
-            192.168.99.100:9000 https://fxa.michielbdejong.com:9000 AND \
-            192.168.99.100:9010 https://fxa.michielbdejong.com:9010 AND \
-            192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
-            192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
-            192.168.99.100:8000 https://fxa.michielbdejong.com:8000
-
-## Frontend:
-pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,3030,9000,9010,1111,5000,8000
-## TODO: not use a http connection to the frontend
+# # Running pagekite:
+#
+# ## Backend:
+# pagekite.py --frontend=fxa.michielbdejong.com:80 \
+#             192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
+#             192.168.99.100:9000 https://fxa.michielbdejong.com:9000 AND \
+#             192.168.99.100:9010 https://fxa.michielbdejong.com:9010 AND \
+#             192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
+#             192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
+#             192.168.99.100:8000 https://fxa.michielbdejong.com:8000
+#
+# ## Frontend:
+# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,3030,9000,9010,1111,5000,8000
+# ## TODO: not use a http connection to the frontend
