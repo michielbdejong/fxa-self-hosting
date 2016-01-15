@@ -1,21 +1,25 @@
 # Get a LetsEncrypt certificate
 
-# docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
-#
-# $ service apache2 start
-# -> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
-# $ ./letsencrypt-auto --apache --text -vv
-# -> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
-# $ exit
-#
-# cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
-# chmod -R ugo+r `pwd`/fxa-cert
-# cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.pem
+````bash
+docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
+
+$ service apache2 start
+ -> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
+$ ./letsencrypt-auto --apache --text -vv
+ -> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
+$ exit
+
+cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
+chmod -R ugo+r `pwd`/fxa-cert
+cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.pem
+````
 
 # Set up your pagekite frontend
 
-# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
-# ## TODO: not use a http connection to the frontend
+````bash
+pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
+echo TODO: not use a http connection to the frontend
+````
 
 # Run setup.sh
 
@@ -39,3 +43,20 @@ to mark your email address as verified.
 
 NB: If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
 localStorage.clear() in the console and hard-refresh.
+
+# Debugging
+
+To debug one of the containers, e.g. the one with container id ea298056cc in `docker ps`:
+
+````bash
+ docker exec -u root -it ea298056cc /bin/bash
+ # add some console.log statements to the code
+ docker stop ea298056cc
+ docker start ea298056cc
+ docker logs -f ea298056cc
+````
+
+You can also run the container interactively, check setup.sh for the startup params for each one.
+
+You may also have to restart containers that link to the restarted one, for instance
+the main fxa-self-hosting proxy.

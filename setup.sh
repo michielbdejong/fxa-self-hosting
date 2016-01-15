@@ -72,7 +72,7 @@ docker run -d \
            --name content \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
            -e "FXA_URL=https://fxa.michielbdejong.com" \
-           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
+           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010/v1" \
            -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
            -e "REDIRECT_PORT=3031" \
            fxa-content-server
