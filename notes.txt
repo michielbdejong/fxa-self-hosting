@@ -16,6 +16,10 @@ cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.p
 
 # Set up your pagekite frontend
 
+Replace 'secretsecretsecret' with the secret from your ~/.pagekite.rc file in the
+following command, and run it on the pagekite frontend (the server to which DNS
+for fxa.michielbdejong.com points):
+
 ````bash
 pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
 echo TODO: not use a http connection to the frontend
@@ -23,8 +27,10 @@ echo TODO: not use a http connection to the frontend
 
 # Run setup.sh
 
-Check the final output, maybe restart pagekite frontend and backend until https://fxa.michielbdejong.com
-looks the same as https://192.186.99.100 (or whatever your Docker VM IP)
+Check the final output, maybe restart pagekite frontend and backend
+(killing all pagekite processes from `ps auxwww | grep pagekite` in between)
+until there are no rejected duplicates https://fxa.michielbdejong.com looks
+the same as https://192.186.99.100 (or whatever your Docker VM IP)
 
 If DNS hasn't propagated yet, you may need something like:
 
