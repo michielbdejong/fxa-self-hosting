@@ -36,6 +36,11 @@ for the verification email, run:
 
 to mark your email address as verified.
 
+You may also need something like:
+
+docker exec -it verifier.local /bin/bash
+-> echo 45.32.232.152 fxa.michielbdejong.com >> /etc/hosts
+
 * If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
 localStorage.clear() in the console and hard-refresh.
 

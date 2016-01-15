@@ -70,7 +70,7 @@ docker run -d \
 docker run -d \
            --name profile \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:1111" \
-           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com:9000" \
+           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com" \
            -e "OAUTH_SERVER_URL=https://fxa.michielbdejong.com:9010" \
            -e "IMG=local" \
            -e "HOST=0.0.0.0" \
@@ -87,7 +87,7 @@ docker run -d \
 docker run -d \
            --name content \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
-           -e "FXA_URL=https://fxa.michielbdejong.com:9000" \
+           -e "FXA_URL=https://fxa.michielbdejong.com" \
            -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
            -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
            -e "REDIRECT_PORT=3031" \
@@ -100,7 +100,7 @@ docker run -d \
            --name auth \
            --link="httpdb" \
            -e "IP_ADDRESS=0.0.0.0" \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:9000" \
+           -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
            -e "HTTPDB_URL=http://httpdb:8000" \
            fxa-auth-server
 
@@ -111,6 +111,7 @@ docker run -d \
            -e "HOST=0.0.0.0" \
            -e "CONTENT_URL=https://fxa.michielbdejong.com:3030/oauth/" \
            -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
+           -e "ISSUER=fxa.michielbdejong.com" \
            fxa-oauth-server
 
 echo Sleeping to let services come up before linking
@@ -128,7 +129,7 @@ docker run -d \
            --link="syncto" \
            -p 8000:8000 \
            --link="auth" \
-           -p 9000:9000 \
+           -p 443:9000 \
            --link="oauth" \
            -p 9010:9010 \
            -v `pwd`/fxa-cert:/fxa-cert \
@@ -148,17 +149,18 @@ echo - fxa-auth-db-mysql
 
 echo On Mac, see https://[$DOCKER_HOST]:3030/
 
-# # Running pagekite:
-#
-# ## Backend:
-# pagekite.py --frontend=fxa.michielbdejong.com:80 \
-#             192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
-#             192.168.99.100:9000 https://fxa.michielbdejong.com:9000 AND \
-#             192.168.99.100:9010 https://fxa.michielbdejong.com:9010 AND \
-#             192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
-#             192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
-#             192.168.99.100:8000 https://fxa.michielbdejong.com:8000
+echo Running pagekite backend
+
+pagekite.py --frontend=fxa.michielbdejong.com:80 \
+            192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
+            192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
+            192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
+            192.168.99.100:8000 https://fxa.michielbdejong.com:8000 AND \
+            192.168.99.100:443 https://fxa.michielbdejong.com:443 AND \
+            192.168.99.100:9010 https://fxa.michielbdejong.com:9010
+
+
 #
 # ## Frontend:
-# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,3030,9000,9010,1111,5000,8000
+# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
 # ## TODO: not use a http connection to the frontend
