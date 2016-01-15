@@ -1,56 +1,41 @@
-* Hosting options:
+# Get a LetsEncrypt certificate
 
-1) including webserver (just need DNR, DNS, Ubuntu 15.10)
-2) just moz.domain.com (just need Docker) if you already run a primary IDP, or have an account at Mozilla's secondary IDP
+# docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
+#
+# $ service apache2 start
+# -> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
+# $ ./letsencrypt-auto --apache --text -vv
+# -> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
+# $ exit
+#
+# cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
+# chmod -R ugo+r `pwd`/fxa-cert
+# cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.pem
 
-# Services mapping:
+# Set up your pagekite frontend
 
-accounts.firefox.com -443-> fxa-content-server
- = 127.0.0.1:3030             * PUBLIC_URL= 'https://fxa.michielbdejong.com:3030'
-                              * FXA_URL= 'https://fxa.michielbdejong.com:9000'
+# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
+# ## TODO: not use a http connection to the frontend
 
-oauth.accounts.firefox.com -443-> fxa-oauth-server
- = 127.0.0.1:9010
- = 9011? private?
+# Run setup.sh
 
-profile.accounts.firefox.com -443-> fxa-profile-server
- = 127.0.0.1:1111
+Check the final output, maybe restart pagekite frontend and backend until https://fxa.michielbdejong.com
+looks the same as https://192.186.99.100 (or whatever your Docker VM IP)
 
-api.accounts.firefox.com -443-> fxa-auth-server
- - 127.0.0.1:9000                 * PUBLIC_URL= 'https://fxa.michielbdejong.com:9000'
-                                  * HTTPDB_URL= 'https://fxa.michielbdejong.com:8000'
+If DNS hasn't propagated yet, you may need something like:
 
-# Internal:
-* fxa-auth-db-mysql
-* mailer
+docker exec -u root -it verifier.local /bin/bash
+docker exec -u root -it profile /bin/bash
+-> echo 45.32.232.152 fxa.michielbdejong.com >> /etc/hosts
 
-* run fxa-content-server with letsencrypt on https://fxa.michielbdejong.com/
-* run fxa-auth-server with letsencrypt on https://fxa.michielbdejong.com:9000/
+# Creating your account
 
-
-
-* Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
+Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
 for the verification email, run:
 
  docker exec -it httpdb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
 
 to mark your email address as verified.
 
-You may also need something like:
-
-docker exec -it verifier.local /bin/bash
--> echo 45.32.232.152 fxa.michielbdejong.com >> /etc/hosts
-
-* If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
+NB: If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
 localStorage.clear() in the console and hard-refresh.
-
-* TODO: get email working, trying in fxa-auth-server with:
-           -e "SMTP_HOST=smtp.********.net" \
-           -e "SMTP_PORT=587" \
-           -e "SMTP_SECURE=true" \
-           -e "SMTP_USER=********" \
-           -e "SMTP_PASS=`********" \
-
-* TODO: browserid assertion is invalid
-
-* TODO: redo the whole setup on a fresh server, and document each step

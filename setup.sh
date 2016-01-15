@@ -22,30 +22,14 @@ echo Building Mozilla images - skipping
 
 # docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
 # docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
-# docker build -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
+# docker build -f ./docs/self-host.docker -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
 # docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
-# docker build -t fxa-oauth-server https://github.com/mozilla/fxa-oauth-server.git
-# docker build -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
+# docker build -f ./docs/self-host.docker -t fxa-oauth-server https://github.com/michielbdejong/fxa-oauth-server.git#docker
+# docker build -f ./docs/self-host.docker -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
 # docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
 # docker build -t syncserver https://github.com/mozilla-services/syncserver.git
 # docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
 # docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git
-
-
-echo Setting up LetsEncrypt - skipping
-
-# docker run -it --net=host --rm -v `pwd`/letsencrypt:/etc/letsencrypt fxa-letsencrypt /bin/bash
-#
-# $ service apache2 start
-# -> check http://fxa.michielbdejong.com and https://fxa.michielbdejong.com (cert warning) show the apache default page
-# $ ./letsencrypt-auto --apache --text -vv
-# -> answer the questions: Yes, fxa.michielbdejong.com, michiel@mozilla.com, Agree
-# $ exit
-#
-# cp -r `pwd`/letsencrypt/live/fxa.michielbdejong.com `pwd`/fxa-cert
-# chmod -R ugo+r `pwd`/fxa-cert
-# cat `pwd`/fxa-cert/cert.pem `pwd`/fxa-cert/chain.pem > `pwd`/fxa-cert/combined.pem
-
 
 echo Stopping all running Docker containers
 docker stop `docker ps -q`
@@ -158,9 +142,3 @@ pagekite.py --frontend=fxa.michielbdejong.com:80 \
             192.168.99.100:8000 https://fxa.michielbdejong.com:8000 AND \
             192.168.99.100:443 https://fxa.michielbdejong.com:443 AND \
             192.168.99.100:9010 https://fxa.michielbdejong.com:9010
-
-
-#
-# ## Frontend:
-# pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
-# ## TODO: not use a http connection to the frontend

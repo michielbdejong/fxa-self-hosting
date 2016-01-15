@@ -5,20 +5,4 @@ Instructions for hosting a Firefox Accounts instance on your own domain name
 
 Do *not* use this in production! It's not ready yet. :) Most services still use the development settings, so that's entirely insecure. Apart from that, all it can do so far is show you an `Unexpected error` message (still debugging that).
 
-## Steps:
-* Get a domain name if you don't have one yet.
-* Get a fresh Ubuntu 15.10 server.
-* Point fxa.yourdomain.com to your Ubuntu server in DNS
-* Ssh into your server, and run:
-````bash
-wget https://raw.githubusercontent.com/michielbdejong/fxa-self-hosting/master/setup.sh | sh
-````
-* Follow the instructions to register a LetsEncrypt certificate, answers:
-  * Yes
-  * fxa.yourdomain.com
-  * your@email.com
-  * Agree
-  * Secure
-  * Ok
-
-* Browse to https://fxa.yourdomain.com/
+I'm working on the notes.txt file in this repo to try to get this working on a Macbook with Docker, behind a self-hosted pagekite proxy.
