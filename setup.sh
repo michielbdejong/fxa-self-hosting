@@ -54,7 +54,7 @@ docker run -d \
 docker run -d \
            --name profile \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com:1111" \
-           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com" \
+           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com/v1" \
            -e "OAUTH_SERVER_URL=https://fxa.michielbdejong.com:9010/v1" \
            -e "IMG=local" \
            -e "HOST=0.0.0.0" \
