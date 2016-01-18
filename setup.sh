@@ -86,6 +86,7 @@ docker run -d \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
            -e "HTTPDB_URL=http://httpdb:8000" \
+           -e "OAUTH_URL=https://fxa.michielbdejong.com:9010" \
            fxa-auth-server
 
 docker run -d \
