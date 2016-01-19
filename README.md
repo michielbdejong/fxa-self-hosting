@@ -22,7 +22,10 @@ Instructions for hosting Mozilla Services on your own domain name. Services incl
 
 ## Work in progress
 
-Do *not* use this in production! It's not ready yet. :) Most services still use the development settings, so that's entirely insecure.
+Do *not* use this in production! It's not ready yet. :) Most services still use
+the development settings (see
+https://github.com/michielbdejong/fxa-self-hosting/issues/10), so that's entirely
+insecure.
 
 ## Audience
 
@@ -91,16 +94,16 @@ echo TODO: not use a http connection (?) to the frontend
 ### Step 3: Run build.sh
 
 The `build.sh` script from this repo will build the necessary Docker images. This
-will probably take up to half an hour, so grab a coffee. This file doesn't contain
-the string fxa.michielbdejong.com so you can run it without editing it first.
+will probably take up to half an hour, so grab a coffee.
 
 ### Step 4: Run setup.sh
 
-The `setup.sh` script from this repo will stop and destroy all running Docker
-containers, so don't run it on a server where you're also running some other
-Docker-based things. Make sure to replace the string 'fxa.michielbdejong.com' with
-your own sub-domain before running it. You may also want to convert this bash script
-to a docker-compose.yml file if that's your thing; the result will be the same.
+Running `setup.sh fxa.michielbdejong.com` (script in the root of this repo) will
+stop and destroy all running Docker containers, so don't run it on a server
+where you're also running some other Docker-based things. Make sure to run it with
+your own sub-domain instead of 'fxa.michielbdejong.com', of course. You may also
+want to convert this bash script to a docker-compose.yml file if that's your
+thing; the result will be the same.
 
 The script assumes that `./fxa-cert/combined.pem` and `./fxa-cert/privkey.pem` exist.
 
@@ -114,10 +117,10 @@ On MacOS, Docker runs inside a virtual machine, probably on 192.168.99.100. In
 any case, you can use your browser or a http tool like curl to test if https://192.168.99.100
 is responding.
 
-Edit and run `fly.sh` from this repo, and maybe restart the pagekite frontend and backend
-(killing all pagekite processes from `ps auxwww | grep pagekite` in between)
-until there are no rejected duplicates and https://fxa.michielbdejong.com looks
-the same as https://192.186.99.100 (or whatever your Docker VM IP), and same for
+Run `fly.sh fxa.michielbdejong.com` from this repo, and maybe restart the pagekite
+frontend and backend (killing all pagekite processes from `ps auxwww | grep pagekite`
+in between) until there are no rejected duplicates and https://fxa.michielbdejong.com
+looks the same as https://192.186.99.100 (or whatever your Docker VM IP), and same for
 the https services on ports :1111, :3030, :5000, :8000, and :9010.
 
 ### Step 6: Configuring syncserver

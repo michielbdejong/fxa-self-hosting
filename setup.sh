@@ -1,10 +1,38 @@
 #!/bin/bash
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+[ "$#" -eq 1 ] || die "1 argument required, $# provided"
+echo $1 | grep -E -q '^[a-z0-9\.]+$' || die "Argument $1 does not look like a domain name"
+[ -f "./fxa-cert/combined.pem" ] || die "./fxa-cert/combined.pem does not exist"
+[ -f "./fxa-cert/privkey.pem" ] || die "./fxa-cert/privkey.pem does not exist"
+
+echo Creating syncserver-config
+mkdir -p syncserver-config
+cat <<EOF > syncserver-config/syncserver.ini
+[server:main]
+use = egg:gunicorn
+host = 0.0.0.0
+port = 5000
+workers = 1
+timeout = 30
+
+[app:main]
+use = egg:syncserver
+
+[syncserver]
+force_wsgi_environ = true
+public_url = https://$1:5000/
+audiences = https://$1:5000
+EOF
 
 echo Stopping all running Docker containers
 docker stop `docker ps -q`
 docker rm `docker ps -aq`
 
-echo Starting up
+echo Starting up services for $1
 
 cd ~/notes
 
@@ -22,24 +50,24 @@ docker run -d \
 
 docker run -d \
            --name profile \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:1111" \
-           -e "AUTH_SERVER_URL=https://fxa.michielbdejong.com/v1" \
-           -e "OAUTH_SERVER_URL=https://fxa.michielbdejong.com:9010/v1" \
+           -e "PUBLIC_URL=https://$1:1111" \
+           -e "AUTH_SERVER_URL=https://$1/v1" \
+           -e "OAUTH_SERVER_URL=https://$1:9010/v1" \
            -e "IMG=local" \
            -e "HOST=0.0.0.0" \
            fxa-profile-server
 
 docker run -d \
            --name syncto \
-           -e "SYNCTO_TOKEN_SERVER_URL=https://fxa.michielbdejong.com:5000/token/" \
+           -e "SYNCTO_TOKEN_SERVER_URL=https://$1:5000/token/" \
            syncto
 
 docker run -d \
            --name content \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:3030" \
-           -e "FXA_URL=https://fxa.michielbdejong.com" \
-           -e "FXA_OAUTH_URL=https://fxa.michielbdejong.com:9010" \
-           -e "FXA_PROFILE_URL=https://fxa.michielbdejong.com:1111" \
+           -e "PUBLIC_URL=https://$1:3030" \
+           -e "FXA_URL=https://$1" \
+           -e "FXA_OAUTH_URL=https://$1:9010" \
+           -e "FXA_PROFILE_URL=https://$1:1111" \
            -e "REDIRECT_PORT=3031" \
            fxa-content-server
 
@@ -49,25 +77,28 @@ sleep 5
 docker run -d \
            --name sync \
            --link="verifier.local" \
-           syncserver
+           -v `pwd`/syncserver-config:/config:ro \
+           --entrypoint ./local/bin/gunicorn \
+           syncserver \
+           --paste /config/syncserver.ini
 
 docker run -d \
            --name auth \
            --link="httpdb" \
            -e "IP_ADDRESS=0.0.0.0" \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com" \
+           -e "PUBLIC_URL=https://$1" \
            -e "HTTPDB_URL=http://httpdb:8000" \
-           -e "OAUTH_URL=https://fxa.michielbdejong.com:9010" \
+           -e "OAUTH_URL=https://$1:9010" \
            fxa-auth-server
 
 docker run -d \
            --link="verifier.local" \
            --name oauth \
-           -e "PUBLIC_URL=https://fxa.michielbdejong.com:9010" \
+           -e "PUBLIC_URL=https://$1:9010" \
            -e "HOST=0.0.0.0" \
-           -e "CONTENT_URL=https://fxa.michielbdejong.com:3030/oauth/" \
+           -e "CONTENT_URL=https://$1:3030/oauth/" \
            -e "VERIFICATION_URL=http://verifier.local:5050/v2" \
-           -e "ISSUER=fxa.michielbdejong.com" \
+           -e "ISSUER=$1" \
            fxa-oauth-server
 
 echo Sleeping to let services come up before linking
