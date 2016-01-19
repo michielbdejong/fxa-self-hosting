@@ -36,7 +36,7 @@ For self-hosting (i.e. hosting an instance the Mozilla Services yourself, on a
 server that's connected to the internet), you will need:
 
 * A server with probably 1 or 2 Gigs of memory and Docker installed, and that's
-not doing anything yet that occupies port 443 (i.e. not )
+not doing anything yet that occupies port 443 (i.e. not hosting any websites)
 * A domain name or subdomain you control and can point to this server
 * A TLS certificate for this (sub-)domain. Once you have your server running and
 your (sub-)domainname pointed to it in DNS (wait for DNS propagation), you can
@@ -57,9 +57,10 @@ In these instructions, I use fxa.michielbdejong.com as the example subdomain on 
 all the services will be running (using various TCP ports). Replace this string with your
 own (sub-)domain name wherever you see it. Note that one of the services (fxa-auth-server)
 will be occupying port 443 (https://fxa.michielbdejong.com/), so if you already run your
-website or blog on your server, you will want to use a subdomain (I used fxa. in this case).
+website or blog on your server, you will want to use an extra server, on a subdomain
+(I used fxa. in this case).
 
-### Step 1: getting the TLS certificate
+### Step 1: Getting the TLS certificate
 
 If you get your TLS certificate using LetsEncrypt, it will be saved to /etc/letsencrypt.
 Find your certificate there, and copy it to a convenient location on the server that will
@@ -84,7 +85,7 @@ for fxa.michielbdejong.com points):
 
 ````bash
 pagekite.py --isfrontend --domain *:fxa.michielbdejong.com:secretsecretsecret --ports=80,1111,3030,5000,8000,443,9010
-echo TODO: not use a http connection to the frontend
+echo TODO: not use a http connection (?) to the frontend
 ````
 
 ### Step 3: Run build.sh
@@ -123,10 +124,12 @@ the https services on ports :1111, :3030, :5000, :8000, and :9010.
 
 Looking for a proper way to do this through env vars; until then:
 
+````bash
 docker exec -it -u root sync /bin/bash
 root@b5c1ba63de07:~# apt-get update && apt-get install -yq vim
 root@b5c1ba63de07:~# vim ./local/lib/python2.7/site-packages/tokenserver/verifiers.py
 -> edit verifier_url = "http://verifier.local:5050/v2"
+````
 
 and restart the sync and proxy containers (in that order, since the proxy container
 links to the sync container):
@@ -166,23 +169,22 @@ And in build/config/phone/custom-prefs.js (assuming you're building for the phon
 
 
 There are also two prefs you need to change at the B2G level, but if you're using B2G-Desktop,
- you can change it in the pref/b2g.js file without having to rebuild all of B2G:
-````bash
-vim /Applications/B2GDebug.app/Contents/Resources/defaults/pref/b2g.js and then:
-````
-
-The prefs to change are:
+you can change it in the /Applications/B2GDebug.app/Contents/Resources/defaults/pref/b2g.js
+file without having to rebuild all of B2G. The prefs to change are:
 
 * pref("identity.fxaccounts.remote.oauth.uri", "https://fxa.michielbdejong.com:9010/v1");
 * pref("identity.fxaccounts.remote.profile.uri", "https://fxa.michielbdejong.com:1111/v1");
 
 ## Debugging
 
-If DNS hasn't propagated yet, you may need something like:
+If DNS hasn't propagated yet, you may need to spike /etc/hosts in the profile and
+verifier.local containers:
 
+````bash
 docker exec -u root -it verifier.local /bin/bash
 docker exec -u root -it profile /bin/bash
 -> echo 45.32.232.152 fxa.michielbdejong.com >> /etc/hosts
+````
 
 ... or just wait for a bit. :)
 
