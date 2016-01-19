@@ -1,35 +1,4 @@
 #!/bin/bash
-echo This startup script is for Ubuntu Wily 15.10
-
-echo General setup - skipping
-
-# apt-get update -y
-# apt-get upgrade -y
-# apt-get install -y unattended-upgrades git vim python
-
-
-echo Setting up Docker - skipping
-
-# apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-# echo deb https://apt.dockerproject.org/repo ubuntu-wily main > /etc/apt/sources.list.d/docker.list
-# apt-get update
-# apt-get purge lxc-docker*
-# apt-get install -y linux-image-extra-$(uname -r) docker-engine docker-compose
-# service docker start
-
-
-echo Building Mozilla images - skipping
-
-# docker build -t fxa-letsencrypt https://github.com/michielbdejong/fxa-letsencrypt.git#docker
-# docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
-# docker build -f ./docs/self-host.docker -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
-# docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
-# docker build -f ./docs/self-host.docker -t fxa-oauth-server https://github.com/michielbdejong/fxa-oauth-server.git#docker
-# docker build -f ./docs/self-host.docker -t browserid-verifier https://github.com/michielbdejong/browserid-verifier.git#docker
-# docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
-# docker build -t syncserver https://github.com/michielbdejong/syncserver.git#docker
-# docker build -t syncto https://github.com/michielbdejong/syncto.git#docker
-# docker build -t fxa-self-hosting https://github.com/michielbdejong/fxa-self-hosting.git
 
 echo Stopping all running Docker containers
 docker stop `docker ps -q`
@@ -134,15 +103,3 @@ echo - syncserver,
 echo - fxa-profile-server,
 echo - browserid-verifier,
 echo - fxa-auth-db-mysql
-
-echo On Mac, see https://[$DOCKER_HOST]:3030/
-
-echo Running pagekite backend
-
-pagekite.py --frontend=fxa.michielbdejong.com:80 \
-            192.168.99.100:1111 https://fxa.michielbdejong.com:1111 AND \
-            192.168.99.100:3030 https://fxa.michielbdejong.com:3030 AND \
-            192.168.99.100:5000 https://fxa.michielbdejong.com:5000 AND \
-            192.168.99.100:8000 https://fxa.michielbdejong.com:8000 AND \
-            192.168.99.100:443 https://fxa.michielbdejong.com:443 AND \
-            192.168.99.100:9010 https://fxa.michielbdejong.com:9010
