@@ -66,14 +66,12 @@ and restart the syncto and fxa-self-hosting containers (f5446f37393d in this exa
 docker restart b5c1ba63de07
 docker restart f5446f37393d
 
-# See https://github.com/michielbdejong/fxa-self-hosting/issues/1#issuecomment-172652305
-# # Configuring syncserver
-#
-# Similarly, edit the syncserver:
-#
-# root@f90bcddd85fa:/home/app/syncserver# grep -r http://verifier.local:5050/v2 .
-# ./local/lib/python2.7/site-packages/browserid/verifiers/remote.py:BROWSERID_VERIFIER_URL = "http://verifier.local:5050/v2/verify"
-# ./local/lib/python2.7/site-packages/tokenserver/verifiers.py:            verifier_url = "http://verifier.local:5050/v2"
+# Configuring syncserver
+
+Similarly, edit the syncserver:
+
+root@f90bcddd85fa:/home/app/syncserver# vim ./local/lib/python2.7/site-packages/tokenserver/verifiers.py
+-> edit verifier_url = "http://verifier.local:5050/v2"
 
 # Debugging
 

@@ -61,11 +61,8 @@ docker run -d \
            fxa-profile-server
 
 docker run -d \
-           --name sync \
-           syncserver
-
-docker run -d \
            --name syncto \
+           -e "SYNCTO_TOKEN_SERVER_URL=https://fxa.michielbdejong.com:5000/token/" \
            syncto
 
 docker run -d \
@@ -79,6 +76,11 @@ docker run -d \
 
 echo Sleeping to let services come up before linking
 sleep 5
+
+docker run -d \
+           --name sync \
+           --link="verifier.local" \
+           syncserver
 
 docker run -d \
            --name auth \
@@ -105,6 +107,7 @@ sleep 5
 echo Setting up proxy
 
 docker run -d \
+           --name proxy \
            --link="profile" \
            -p 1111:1111 \
            --link="content" \
