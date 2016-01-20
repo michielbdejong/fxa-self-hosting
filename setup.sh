@@ -11,6 +11,7 @@ echo $1 | grep -E -q '^[a-z0-9\.]+$' || die "Argument $1 does not look like a do
 
 echo Creating syncserver-config
 mkdir -p syncserver-config
+# Adapted from https://github.com/mozilla-services/syncserver/blob/master/syncserver.ini
 cat <<EOF > syncserver-config/syncserver.ini
 [server:main]
 use = egg:gunicorn
@@ -27,6 +28,12 @@ force_wsgi_environ = true
 public_url = https://$1:5000/
 audiences = https://$1:5000
 EOF
+
+echo Creating auth-config
+mkdir -p auth-config
+docker run -v `pwd`/auth-config:/config:rw \
+           fxa-auth-server \
+           bash -c "cd ./scripts/ && node ./gen_keys.js && cp ../config/*-key.json /config"
 
 echo Stopping all running Docker containers
 docker stop `docker ps -q`
@@ -45,8 +52,7 @@ docker run -d \
            --name verifier.local \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PORT=5050" \
-           browserid-verifier \
-           npm start
+           browserid-verifier
 
 docker run -d \
            --name profile \
@@ -85,11 +91,14 @@ docker run -d \
 docker run -d \
            --name auth \
            --link="httpdb" \
+           -v `pwd`/auth-config:/config:ro \
            -e "IP_ADDRESS=0.0.0.0" \
            -e "PUBLIC_URL=https://$1" \
            -e "HTTPDB_URL=http://httpdb:8000" \
            -e "OAUTH_URL=https://$1:9010" \
-           fxa-auth-server
+           fxa-auth-server \
+           bash -c "cp /config/*-key.json ./config && node ./bin/key_server.js | node ./bin/notifier.js"
+
 
 docker run -d \
            --link="verifier.local" \

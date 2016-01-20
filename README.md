@@ -94,7 +94,8 @@ echo TODO: not use a http connection (?) to the frontend
 ### Step 3: Run build.sh
 
 The `build.sh` script from this repo will build the necessary Docker images. This
-will probably take up to half an hour, so grab a coffee.
+will probably take up to half an hour, so grab a coffee. You should run this script
+regularly, for instance when a new patch version of node 0.10 becomes available.
 
 ### Step 4: Run setup.sh
 
