@@ -54,6 +54,28 @@ server software) are spelled out in detail. If you're having
 any trouble, you can ask for help by mentioning me (michielbdejong) in the #fxa channel
 on irc.mozilla.org, or email me (michiel at mozilla dot com).
 
+## Architecture
+
+The scripts in this self-hosting guide will create 9 containers: one TLS-offloading
+proxy, 6 services which run on various ports, and two supporting ones, which are not
+publically accessible:
+
+````
+                                   INTERNET
+                                       |
+                                       |
+                          fxa-self-hosting/"proxy":1111,443,8000,9010,3030,5000
+          _____________________________|______________________________
+          |              |       |       |           |               |
+fxa-profile-server:1111  |  syncto:8000  |  fxa-content-server:3030  |
+                         |               |                           |
+              fxa-auth-server:443  fxa-oauth-server:9010        syncserver:5000
+                         |               |                           |
+                         |                \_________________________/
+                         |                            |
+          fxa-auth-db-mysql/"httpd":3306    browserid-verifier/"verifier.local":5050
+````
+
 ## Prerequisites
 
 For self-hosting (i.e. hosting an instance the Mozilla Services yourself, on a
