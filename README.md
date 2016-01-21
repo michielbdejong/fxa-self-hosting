@@ -130,23 +130,27 @@ Looking for a proper way to do this through env vars; until then:
 
 ````bash
 docker exec -it -u root sync /bin/bash
-root@b5c1ba63de07:~# apt-get update && apt-get install -yq vim
-root@b5c1ba63de07:~# vim ./local/lib/python2.7/site-packages/tokenserver/verifiers.py
+root@b5c1ba63de07:/home/app/syncserver# apt-get update && apt-get install -yq vim
+root@b5c1ba63de07:/home/app/syncserver# vim ./local/lib/python2.7/site-packages/tokenserver/verifiers.py +85
 -> edit verifier_url = "http://verifier.local:5050/v2"
+root@b5c1ba63de07:/home/app/syncserver# exit
 ````
 
 and restart the sync and proxy containers (in that order, since the proxy container
 links to the sync container):
 
-docker restart sync
-docker restart proxy
+````bash
+docker restart sync ; docker restart proxy
+````
 
 ### Step 7: Creating your account
 
 Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
 for the verification email, run:
 
- docker exec -it httpdb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
+````bash
+docker exec -it httpdb mysql -e "USE fxa; UPDATE accounts SET emailVerified=1;"
+````
 
 to mark your email address as verified.
 
@@ -206,6 +210,20 @@ You can also run a container interactively, check setup.sh for the startup param
 
 Again, you will have to restart containers that link to the restarted one, for instance
 the main fxa-self-hosting proxy.
+
+A nice tool for seeing the contents of your sync server is
+[syncclient](https://github.com/mozilla-services/syncclient). Apart from following
+syncclient's readme instructions, make sure to edit `syncclient/client.py` like this:
+
+````diff
+-TOKENSERVER_URL = "https://token.services.mozilla.com/"
+-FXA_SERVER_URL = "https://api.accounts.firefox.com"
++TOKENSERVER_URL = "https://fxa.michielbdejong.com:5000/token/"
++FXA_SERVER_URL = "https://fxa.michielbdejong.com"
+````
+
+And then try running commands like
+`get_collection_counts`, `get_records history`, or  `get_record crypto keys` with it.
 
 # Disclaimer
 
