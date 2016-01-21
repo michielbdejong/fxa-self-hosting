@@ -85,6 +85,8 @@ comes back in to the proxy, and from there goes to the syncserver), and via the 
 (e.g. the fxa-content-server contains webpages that make XHR requests to several other services).
 You can see these relations as
 the `-e SOME_URL = "https://$1:1234/"` parameters in `setup.sh`:
+
+````
  _________
 /         \
 |      fxa-content-server
@@ -98,7 +100,7 @@ the `-e SOME_URL = "https://$1:1234/"` parameters in `setup.sh`:
 |     \    v           /
 |      fxa-oauth-server
 \________/
-
+````
 
 ## Prerequisites
 
