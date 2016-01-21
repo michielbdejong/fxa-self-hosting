@@ -63,18 +63,42 @@ publically accessible:
 ````
                                    INTERNET
                                        |
-                                       |
+                                       v
                           fxa-self-hosting/"proxy":1111,443,8000,9010,3030,5000
           _____________________________|______________________________
           |              |       |       |           |               |
+          v              |       v       |           v               |
 fxa-profile-server:1111  |  syncto:8000  |  fxa-content-server:3030  |
-                         |               |                           |
+                         v               v                           v
               fxa-auth-server:443  fxa-oauth-server:9010        syncserver:5000
                          |               |                           |
                          |                \_________________________/
                          |                            |
+                         v                            v
           fxa-auth-db-mysql/"httpd":3306    browserid-verifier/"verifier.local":5050
 ````
+
+The lines indicated container linking. You can see these as the `--link` parameters
+in `setup.sh`. The various servers also communicate with each other
+via the internet (e.g. the syncto container will to a https request that goes out to the internet,
+comes back in to the proxy, and from there goes to the syncserver), and via the browser
+(e.g. the fxa-content-server contains webpages that make XHR requests to several other services).
+You can see these relations as
+the `-e SOME_URL = "https://$1:1234/"` parameters in `setup.sh`:
+ _________
+/         \
+|      fxa-content-server
+|     /    |
+^    |     v
+|    | fxa-profile-server      syncto
+|    v     |           |         |
+|    |\    v           |         v
+^    | fxa-auth-server |      syncserver
+|    v     |           v
+|     \    v           /
+|      fxa-oauth-server
+\________/
+
 
 ## Prerequisites
 
