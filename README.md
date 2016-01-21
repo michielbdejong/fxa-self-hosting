@@ -20,16 +20,37 @@ Instructions for hosting Mozilla Services on your own domain name. Services incl
   * syncto (only required for Firefox OS)
 
 
-## Work in progress
+## Not sec-reviewed, use at own risk!
 
-Do *not* use this in production! It's not ready yet. :) Most services still use
-the development settings (see
-https://github.com/michielbdejong/fxa-self-hosting/issues/10), so that's entirely
-insecure.
+These scripts are *not* security-reviewed Mozilla software, and meant only for people who
+want to have some fun trying out self-hosting. Create an empty Firefox profile for trying it
+out, don't sync your main profile's data to it, it's not secure enough for that.
+
+If you use this in production for your own personal
+data (including for instance all the passwords you saved in your browser), you will
+have to do your own security review, server hardening, and intrusion detection, and
+make sure to keep both your host server and the containers patched with security
+updates.
+
+This is especially true if you want to use these scripts to host Firefox Accounts
+and linked services for other people besides yourself.
+
+To give an example, the fxa-auth-db-mysql container connects to mysql [using the
+root user and no
+password](https://github.com/michielbdejong/fxa-auth-db-mysql/blob/docker/docs/self-host.docker#L13).
+
+Also, the syncserver [stores data just in-memory](https://github.com/michielbdejong/fxa-self-hosting/issues/13),
+so synced data is lost not only when you remove the syncserver container, but even
+if you just restart it.
+
+If you find a security issue with these scripts (or other improvements), please
+[open a github issue] about it. Pull requests welcome! :)
 
 ## Audience
 
-This guide is intended for people with basic sysadmin experience. If you're having
+This guide is intended for people with basic sysadmin experience, and not all the
+steps you will need to take (e.g. using ssh, obtaining a TLS certificate, installing
+server software) are spelled out in detail. If you're having
 any trouble, you can ask for help by mentioning me (michielbdejong) in the #fxa channel
 on irc.mozilla.org, or email me (michiel at mozilla dot com).
 
@@ -48,11 +69,17 @@ get one for free from [LetsEncrypt](https://letsencrypt.org/).
 If you prefer to host the services on a computer in your house ("home-hosting"),
 then you need to make this computer addressable on the public internet. You can
 do this using a reverse proxy tunnel like Pagekite (see instructions below), or
-maybe with DynDNS. The reverse proxy tunnel needs to run on an addressable server,
+maybe with DynDNS.
+
+The reverse proxy tunnel needs to run on an addressable server,
 but it can be a much smaller (cheaper) one, and also, this reverse proxy tunnel
 will not store any of your data (the data would be in your house), and if configured
 correctly, it cannot eavesdrop on any of the traffic that goes through it (because
 TLS is terminated in your house, not at the proxy).
+
+Note that the same disclaimer
+applies, that these scripts have not been reviewed for security issues, so don't
+storing valuable data like your saved passwords is all at your own risk.
 
 ## Setup
 
