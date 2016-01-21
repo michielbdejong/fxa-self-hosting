@@ -78,13 +78,13 @@ fxa-profile-server:1111  |  syncto:8000  |  fxa-content-server:3030  |
           fxa-auth-db-mysql/"httpd":3306    browserid-verifier/"verifier.local":5050
 ````
 
-The lines indicated container linking. You can see these as the `--link` parameters
+The lines indicate container linking. You can see these as the `--link` parameters
 in `setup.sh`. The various servers also communicate with each other
-via the internet (e.g. the syncto container will to a https request that goes out to the internet,
+via the internet (e.g. the syncto container will do a https request that goes out to the internet,
 comes back in to the proxy, and from there goes to the syncserver), and via the browser
-(e.g. the fxa-content-server contains webpages that make XHR requests to several other services).
+(e.g. the fxa-content-server serves up webpages that make XHR requests to several other services).
 You can see these relations as
-the `-e SOME_URL = "https://$1:1234/"` parameters in `setup.sh`:
+the `-e SOME_URL = "https://$1:1234/"` parameters in [`setup.sh`](https://github.com/michielbdejong/fxa-self-hosting/blob/master/setup.sh):
 
 ````
  _________
