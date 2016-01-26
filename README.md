@@ -199,7 +199,26 @@ in between) until there are no rejected duplicates and https://fxa.michielbdejon
 looks the same as https://192.186.99.100 (or whatever your Docker VM IP), and same for
 the https services on ports :1111, :3030, :5000, :8000, and :9010.
 
-### Step 6: Configuring syncserver
+### Step 6: Configuring content server
+
+Looking for a proper way to do this through env vars; until then:
+
+````bash
+docker exec -it -u root content /bin/bash
+root@1e1dbee9b940:/home/fxa/fxa-content-server# apt-get update && apt-get install -yq vim
+root@1e1dbee9b940:/home/fxa/fxa-content-server# vim ./server/config/local.json +9
+-> change "YOU MUST CHANGE ME" to some random string (e.g. `pwgen 40 1`)
+root@1e1dbee9b940:/home/fxa/fxa-content-server# exit
+````
+
+and restart the content and proxy containers (in that order, since the proxy container
+links to the content container):
+
+````bash
+docker restart content ; docker restart proxy
+````
+
+### Step 7: Configuring syncserver
 
 Looking for a proper way to do this through env vars; until then:
 
@@ -218,7 +237,7 @@ links to the sync container):
 docker restart sync ; docker restart proxy
 ````
 
-### Step 7: Creating your account
+### Step 8: Creating your account
 
 Sign up on https://fxa.michielbdejong.com:3030/, and instead of going to look
 for the verification email, run:
@@ -232,13 +251,13 @@ to mark your email address as verified.
 NB: If you get https://fxa.michielbdejong.com:3030/unexpected_error, run
 localStorage.clear() in the console and hard-refresh.
 
-### Step 8: Configure Firefox Desktop
+### Step 9: Configure Firefox Desktop
 
 Edit the values in about:config like so:
 
 ![Image about:config](https://cloud.githubusercontent.com/assets/408412/12393881/d144dd5a-bdf8-11e5-8cb6-fb0d233b1d99.png)
 
-### Step 9: (Firefox OS only) Configure and build Gaia
+### Step 10: (Firefox OS only) Configure and build Gaia
 
 In build/config/common-settings.json, edit:
 
