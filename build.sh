@@ -20,9 +20,9 @@ docker pull nginx
 
 echo Building images...
 
-docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/michielbdejong/fxa-content-server.git#docker
+docker build -f ./docs/self-host.docker -t fxa-content-server https://github.com/mozilla/fxa-content-server.git
 docker build -f ./docs/self-host.docker -t fxa-auth-server https://github.com/michielbdejong/fxa-auth-server.git#docker
-docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/michielbdejong/fxa-auth-db-mysql.git#docker
+docker build -f ./docs/self-host.docker -t fxa-auth-db-mysql https://github.com/mozilla/fxa-auth-db-mysql.git
 docker build -f ./docs/self-host.docker -t fxa-oauth-server https://github.com/michielbdejong/fxa-oauth-server.git#docker
 docker build -t browserid-verifier https://github.com/mozilla/browserid-verifier.git#docker-improvements
 docker build -f ./docs/self-host.docker -t fxa-profile-server https://github.com/michielbdejong/fxa-profile-server.git#docker
