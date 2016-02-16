@@ -5,7 +5,7 @@ die () {
 }
 
 [ "$#" -eq 1 ] || die "1 argument required, $# provided"
-echo $1 | grep -E -q '^[a-z0-9\.]+$' || die "Argument $1 does not look like a domain name"
+echo $1 | grep -E -q '^[-a-z0-9\.]+$' || die "Argument $1 does not look like a domain name"
 [ -f "./fxa-cert/combined.pem" ] || die "./fxa-cert/combined.pem does not exist"
 [ -f "./fxa-cert/privkey.pem" ] || die "./fxa-cert/privkey.pem does not exist"
 
