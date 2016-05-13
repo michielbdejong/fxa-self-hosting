@@ -108,7 +108,7 @@ For self-hosting (i.e. hosting an instance the Mozilla Services yourself, on a
 server that's connected to the internet), you will need:
 
 * A server with probably 1 or 2 Gigs of memory and Docker installed, and that's
-not doing anything yet that occupies port 443 (i.e. not hosting any websites)
+not doing anything yet that occupies port 443 (i.e. not hosting any websites), and with [Docker](https://docs.docker.com/engine/installation) installed.
 * A domain name or subdomain you control and can point to this server
 * A TLS certificate for this (sub-)domain. Once you have your server running and
 your (sub-)domainname pointed to it in DNS (wait for DNS propagation), you can
